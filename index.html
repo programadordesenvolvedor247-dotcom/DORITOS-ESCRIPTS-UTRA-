@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>☠️PAINEL PLUS — ULTRA EGITAO Cinematic</title>
+<link rel="manifest" href="/manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --panel-w: 940px;
+  --radius: 28px;
+  --accent: #ff007a;
+  --bg-dark: #08090b;
+  --glass-bg: rgba(18, 18, 22, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-highlight: rgba(255, 255, 255, 0.18);
+  --shadow-color: rgba(0, 0, 0, 0.6);
+  --text-primary: #ffffff;
+  --input-bg: rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="light"] {
+  --accent: #ff007a;
+  --bg-dark: #eef2f5;
+  --glass-bg: rgba(255, 255, 255, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --glass-highlight: rgba(255, 255, 255, 0.9);
+  --shadow-color: rgba(160, 170, 190, 0.4);
+  --text-primary: #1a1a2e;
+  --input-bg: rgba(255, 255, 255, 0.5);
+}
+
+* { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  font-family: "Inter", sans-serif;
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* =========================================
+   NOVO: LINHAS COLORIDAS NO FUNDO (RGB RAIN)
+   ========================================= */
+.rgb-lines-container {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 0; /* Atrás de tudo */
+    pointer-events: none;
+    overflow: hidden;
+    opacity: 0.4; /* Transparência suave */
+}
+
+.rgb-line {
+    position: absolute;
+    top: -100%;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(180deg, transparent, var(--line-color), transparent);
+    animation: dropLine linear infinite;
+}
+
+@keyframes dropLine {
+    0% { top: -100%; opacity: 0; }
+    10% { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+}
+
+/* =========================================
+   ANIMAÇÃO RGB GERAL
+   ========================================= */
+@keyframes rainbowMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.rainbow-text, 
+.welcome-text, 
+.footer span,
+.btn {
+  background: linear-gradient(
+    270deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00ffff, #0000ff, #8b00ff, #ff0000
+  );
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important; 
+  animation: rainbowMove 8s ease infinite;
+  text-shadow: none !important; 
+  font-weight: bold;
+}
+
+/* =========================================
+   INTRODUÇÃO (bem vindo)
+   ========================================= */
+#introOverlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: transform 1.4s cubic-bezier(0.85, 0, 0.15, 1), opacity 1s ease;
+}
+
+#introOverlay.slide-up {
+  transform: translateY(-100%);
+  opacity: 0.8;
+  filter: blur(10px);
+}
+
+.cat-container { text-align: center; position: relative; -webkit-box-reflect: below 0px linear-gradient(to bottom, rgba(0,0,0,0.0), rgba(0,0,0,0.2)); }
+.cat-gif { width: 160px; height: auto; display: block; margin: 0 auto 10px auto; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); }
+
+.welcome-text {
+  font-family: "Orbitron", sans-serif;
+  font-size: 28px; font-weight: 900; letter-spacing: 6px; margin-top: 20px;
+  opacity: 0; animation: fadeInText 1.5s forwards 0.5s, rainbowMove 8s ease infinite; text-transform: uppercase;
+}
+@keyframes fadeInText { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* =========================================
+   AMBIENTE E FUNDO
+   ========================================= */
+.ambient-light {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;
+  background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.04), transparent 40%);
+  mix-blend-mode: screen;
+}
+.noise-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9998; opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+.wrap {
+  min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 40px 20px; position: relative; z-index: 2; perspective: 1200px;
+}
+
+/* =========================================
+   PAINEL DE VIDRO (MAIN CARD)
+   ========================================= */
+.card {
+  width: min(100%, var(--panel-w));
+  border-radius: var(--radius);
+  background: var(--glass-bg);
+  backdrop-filter: blur(40px) saturate(140%);
+  -webkit-backdrop-filter: blur(40px) saturate(140%);
+  display: flex; gap: 32px; padding: 48px;
+  border: 1px solid var(--glass-border);
+  border-top: 1px solid var(--glass-highlight);
+  box-shadow: 0 40px 80px -20px var(--shadow-color), inset 0 0 0 1px rgba(255,255,255,0.05);
+  position: relative; overflow: hidden;
+}
+
+.left { width: 320px; display: flex; flex-direction: column; gap: 24px; flex-shrink: 0; position: relative; z-index: 2; }
+.logo-container { position: relative; width: 120px; height: 120px; margin-bottom: 8px; }
+.logo {
+  width: 100%; height: 100%; border-radius: 24px;
+  background-size: cover; background-position: center;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); position: relative; z-index: 2;
+}
+.logo-glow {
+  position: absolute; inset: -15px; background: var(--accent);
+  filter: blur(40px); opacity: 0.35; z-index: 1; border-radius: 50%;
+  animation: pulseGlow 5s infinite alternate ease-in-out;
+}
+
+/* =========================================
+   EFEITO GLITCH NO TÍTULO
+   ========================================= */
+.title {
+  font-family: "Orbitron", sans-serif;
+  font-size: 28px; font-weight: 800; margin: 0;
+  letter-spacing: -0.5px; line-height: 1.2;
+  position: relative;
+  color: var(--text-primary);
+  min-height: 1.2em;
+}
+
+/* Classes ativadas via JS */
+.glitch-effect {
+  position: relative;
+}
+.glitch-effect::before,
+.glitch-effect::after {
+  content: attr(data-text);
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+}
+.glitch-effect::before {
+  left: 2px; text-shadow: -1px 0 #ff007a; clip-path: inset(0 0 0 0); animation: glitch-anim-1 3s infinite linear alternate-reverse;
+}
+.glitch-effect::after {
+  left: -2px; text-shadow: -1px 0 #00eaff; clip-path: inset(0 0 0 0); animation: glitch-anim-2 2s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim-1 {
+  0% { clip-path: inset(20% 0 80% 0); } 20% { clip-path: inset(60% 0 10% 0); }
+  40% { clip-path: inset(10% 0 50% 0); } 60% { clip-path: inset(80% 0 5% 0); }
+  80% { clip-path: inset(30% 0 40% 0); } 100% { clip-path: inset(10% 0 60% 0); }
+}
+@keyframes glitch-anim-2 {
+  0% { clip-path: inset(10% 0 60% 0); } 20% { clip-path: inset(80% 0 5% 0); }
+  40% { clip-path: inset(30% 0 20% 0); } 60% { clip-path: inset(10% 0 80% 0); }
+  80% { clip-path: inset(40% 0 10% 0); } 100% { clip-path: inset(70% 0 30% 0); }
+}
+
+.status-box {
+  margin-top: 10px; font-size: 11px; font-weight: 600; letter-spacing: 1px;
+  background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 50px; display: inline-block;
+  border: 1px solid rgba(255,255,255,0.05); color: #fff;
+}
+.status-fixed { color: #00ff88; text-shadow: 0 0 12px rgba(0, 255, 136, 0.5); font-weight: 800; margin-left: 5px; }
+
+/* =========================================
+   BARRA DE PESQUISA (CLEAN DESIGN)
+   ========================================= */
+.right-panel { flex: 1; display: flex; flex-direction: column; gap: 20px; z-index: 2; }
+
+.search-wrapper { position: relative; width: 100%; margin-bottom: 10px; }
+
+.search-input {
+    width: 100%;
+    padding: 16px 20px 16px 50px;
+    border-radius: 20px;
+    background: var(--input-bg);
+    border: none;
+    color: var(--text-primary);
+    font-family: "Inter", sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.search-input::placeholder { color: var(--text-primary); opacity: 0.4; }
+
+.search-input:focus {
+    background: rgba(0,0,0,0.4);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2), inset 0 0 0 1px var(--glass-highlight);
+    transform: scale(1.01);
+}
+
+.search-icon {
+    position: absolute; left: 20px; top: 50%; transform: translateY(-50%);
+    width: 20px; height: 20px; color: var(--text-primary); opacity: 0.4; pointer-events: none;
+    transition: all 0.3s ease;
+}
+.search-input:focus + .search-icon { color: var(--accent); opacity: 1; filter: drop-shadow(0 0 5px var(--accent)); }
+
+/* =========================================
+   LINKS E BORDAS "RGB FLOW"
+   ========================================= */
+.links { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+
+.link-card {
+  display: flex; gap: 18px; align-items: center; padding: 18px; border-radius: 18px;
+  text-decoration: none;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  position: relative; overflow: hidden;
+  transform-style: preserve-3d;
+  transition: transform 0.1s linear, box-shadow 0.3s ease;
+  z-index: 1;
+}
+
+/* RGB Flow Border Animation */
+.link-card::before {
+    content: ''; position: absolute; width: 150%; height: 150%;
+    background: conic-gradient(from 0deg, transparent 0%, transparent 80%, var(--accent) 90%, #fff 100%);
+    top: 50%; left: 50%; translate: -50% -50%;
+    z-index: -2; opacity: 0; transition: opacity 0.3s;
+    animation: spinBorder 3s linear infinite;
+    pointer-events: none;
+}
+.link-card::after {
+    content: ''; position: absolute; inset: 1px;
+    background: var(--bg-dark); /* Máscara para criar a borda */
+    border-radius: 17px; z-index: -1;
+    transition: background 0.3s;
+}
+.link-card:hover::before { opacity: 1; }
+.link-card:hover::after { background: rgba(20,20,25,0.9); }
+@keyframes spinBorder { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* Ícones Neon */
+.icon-box {
+  width: 50px; height: 50px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.03);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+.link-card:hover .icon-box {
+    transform: scale(1.1) rotate(-5deg);
+    border-color: rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.05);
+}
+
+.neon-svg {
+    width: 26px; height: 26px;
+    stroke: var(--text-primary);
+    stroke-width: 1.5;
+    fill: none;
+    filter: drop-shadow(0 0 2px rgba(255,255,255,0.3)); /* Brilho base */
+    transition: all 0.3s ease;
+}
+
+/* Hover: Ícone brilha com a cor de destaque (Accent) */
+.link-card:hover .neon-svg {
+    stroke: var(--accent);
+    filter: drop-shadow(0 0 8px var(--accent)) drop-shadow(0 0 15px var(--accent));
+}
+
+.link-body { display: flex; flex-direction: column; gap: 4px; transform: translateZ(20px); z-index: 2; }
+.link-title { 
+    font-weight: 700; font-size: 15px; letter-spacing: 0.3px; color: var(--text-primary);
+    transition: color 0.3s;
+}
+.link-card:hover .link-title { color: var(--accent); text-shadow: 0 0 10px var(--accent); }
+.link-desc { font-size: 12px; opacity: 0.6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-primary); }
+
+/* =========================================
+   CONTROLES E RODAPÉ
+   ========================================= */
+.controls { position: absolute; top: 32px; right: 32px; display: flex; gap: 12px; z-index: 99; }
+.switch {
+  display: flex; gap: 10px; align-items: center; background: rgba(10,10,10,0.6); padding: 8px 16px;
+  border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(12px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: transform 0.2s;
+}
+.switch:hover { transform: translateY(-2px); }
+.btn { background: none; border: 0; cursor: pointer; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+.toggle { width: 44px; height: 24px; background: rgba(255,255,255,0.1); border-radius: 20px; padding: 3px; transition: background 0.3s; }
+.knob { width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55); box-shadow: 0 2px 5px rgba(0,0,0,0.4); }
+
+.footer { 
+  margin-top: 40px; display: flex; align-items: center; gap: 12px; 
+  font-size: 11px; font-family: "Orbitron", sans-serif; letter-spacing: 2px; 
+}
+.footer img { height: 16px; filter: drop-shadow(0 0 5px rgba(255,255,255,0.8)); }
+
+@keyframes pulseGlow { 0% { opacity: 0.2; transform: scale(0.9); } 100% { opacity: 0.5; transform: scale(1.1); } }
+
+@media(max-width: 900px) {
+  .card { flex-direction: column; padding: 32px 24px; gap: 32px; }
+  .left { width: 100%; flex-direction: row; align-items: center; justify-content: space-between; }
+  .right-panel { width: 100%; }
+  .links { grid-template-columns: 1fr; }
+  .logo-container { width: 70px; height: 70px; }
+  .title { font-size: 22px; }
+  .status-box { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- OVERLAY DE INTRODUÇÃO -->
+<div id="introOverlay">
+  <div class="cat-container">
+    <img src="https://media.tenor.com/B1527Jk41bAAAAAi/cat-walking.gif" alt="Gatinho andando" class="cat-gif">
+    <div class="welcome-text">BEM-VINDO</div>
+  </div>
+</div>
+
+<!-- EFEITOS DE FUNDO -->
+<div class="noise-overlay"></div>
+<div class="ambient-light" id="ambientLight"></div>
+
+<!-- NOVO: EFEITO DE LINHAS COLORIDAS -->
+<div class="rgb-lines-container" id="rgbLines">
+  <!-- As linhas serão geradas via JS -->
+</div>
+
+<div class="controls">
+  <div class="switch">
+    <button id="themeBtn" class="btn">Tema</button>
+    <div id="toggle" class="toggle"><div id="knob" class="knob"></div></div>
+  </div>
+  <div class="switch">
+    <input type="color" id="accentPicker" value="#ff007a" style="width:24px;height:24px;border:none;background:none;cursor:pointer;">
+  </div>
+</div>
+
+<main class="wrap" id="mainWrap">
+  <section class="card">
+    <!-- COLUNA DA ESQUERDA -->
+    <div class="left">
+      <div style="display:flex; gap:20px; align-items:center;">
+        <div class="logo-container">
+            <div class="logo-glow"></div>
+            <div class="logo" id="mainLogo" style="background-image:url('https://i.im.ge/2025/10/10/nE0W36.1000086828.jpeg')"></div>
+        </div>
+        <div>
+           <!-- TÍTULO COM GLITCH -->
+           <h1 class="title" id="mainTitle"></h1>
+           <div class="status-box">
+             SYSTEM:<span class="status-fixed">ONLINE</span>
+           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COLUNA DA DIREITA -->
+    <div class="right-panel">
+        
+        <!-- BARRA DE PESQUISA -->
+        <div class="search-wrapper">
+            <input type="text" id="searchInput" class="search-input" placeholder="Pesquisar acesso..." autocomplete="off">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+        </div>
+
+        <div class="links" id="linksGrid">
+            <!-- Link 1: Painel V4 -->
+            <a href="https://egitonub-blip.github.io/seguran-a/" target="_blank" class="link-card">
+                <div class="icon-box">
+                    <svg class="neon-svg" viewBox="0 0 24 24"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/><polyline points="9 22 9 12 15 12 15 22"/><line x1="4" y1="2" x2="20" y2="2"/><line x1="4" y1="12" x2="4" y2="2"/><line x1="20" y1="12" x2="20" y2="2"/></svg>
+                </div>
+                <div class="link-body"><div class="link-title">Painel V4</div><div class="link-desc">Acesso rápido ao Painel V4</div></div>
+            </a>
+            
+            <!-- Link 2: Taskitos -->
+            <a href="https://taskitos.cupiditys.lol/" target="_blank" class="link-card">
+                <div class="icon-box">
+                    <svg class="neon-svg" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                </div>
+                <div class="link-body"><div class="link-title">Taskitos</div><div class="link-desc">Ferramenta de lições</div></div>
+            </a>
+            
+            <!-- Link 3: Redação -->
+            <a href="https://redacao.cupiditys.lol/" target="_blank" class="link-card">
+                <div class="icon-box">
+                    <svg class="neon-svg" viewBox="0 0 24 24"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+                </div>
+                <div class="link-body"><div class="link-title">Redação</div><div class="link-desc">Práticas e correções</div></div>
+            </a>
+            
+            <!-- Link 4: Expansão -->
+            <a href="https://crimsonzerohub.xyz/expansao" target="_blank" class="link-card">
+                <div class="icon-box">
+                    <svg class="neon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                </div>
+                <div class="link-body"><div class="link-title">Expansão</div><div class="link-desc">Expansão e recursos</div></div>
+            </a>
+            
+            <!-- Link 5: Speakify -->
+            <a href="https://speakify.cupiditys.lol/" target="_blank" class="link-card">
+                <div class="icon-box">
+                    <svg class="neon-svg" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                </div>
+                <div class="link-body"><div class="link-title">Speakify</div><div class="link-desc">Ferramenta de voz</div></div>
+            </a>
+            
+            <!-- Link 6: Plataforma Destroyer -->
+<a href="https://discord.gg/platformdestroyer" target="_blank" class="link-card">
+    <div class="icon-box">
+        <!-- Ícone de Robô -->
+        <svg class="neon-svg" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <path d="M12,2A2,2 0 0,1 14,4C14,4.74 13.6,5.39 13,5.73V7H16A7,7 0 0,1 23,14V17A1,1 0 0,1 22,18H21V20A2,2 0 0,1 19,22H5A2,2 0 0,1 3,20V18H2A1,1 0 0,1 1,17V14A7,7 0 0,1 8,7H11V5.73C10.4,5.39 10,4.74 10,4A2,2 0 0,1 12,2M7.5,13A2.5,2.5 0 0,0 5,15.5A2.5,2.5 0 0,0 7.5,18A2.5,2.5 0 0,0 10,15.5A2.5,2.5 0 0,0 7.5,13M16.5,13A2.5,2.5 0 0,0 14,15.5A2.5,2.5 0 0,0 16.5,18A2.5,2.5 0 0,0 19,15.5A2.5,2.5 0 0,0 16.5,13Z"></path>
+        </svg>
+    </div>
+    <div class="link-body">
+        <div class="link-title">Plataforma Destroyer</div>
+        <div class="link-desc">Ferramenta discord</div>
+    </div>
+</a>
+            
+            <!-- Link 7: Cmsp Bots Discord -->
+<a href="https://discord.gg/i-can-say-tm-1307176076300255292" target="_blank" class="link-card">
+    <div class="icon-box">
+        <!-- Ícone do Discord -->
+        <svg class="neon-svg" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.699.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.419-2.1568 2.419zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.419-2.1568 2.419z"></path>
+        </svg>
+    </div>
+    <div class="link-body">
+        <div class="link-title">Cmsp Bots Discord</div>
+        <div class="link-desc">Bots de Plataformas</div>
+    </div>
+</a>
+            
+            <!-- Link 8: Prepara SP -->
+<a href="https://crimsonzerohub.xyz/preparasp" target="_blank" class="link-card">
+    <div class="icon-box">
+        <!-- Ícone de Livro (Book) -->
+        <svg class="neon-svg" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+        </svg>
+    </div>
+    <div class="link-body">
+        <div class="link-title">Prepara SP</div>
+        <div class="link-desc">Ferramenta de Leitura</div>
+    </div>
+</a>
+            
+            <!-- Link 9: Alura -->
+            <a href="https://crimsonzerohub.xyz/alura" target="_blank" class="link-card">
+                <div class="icon-box">
+                    <svg class="neon-svg" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                </div>
+                <div class="link-body"><div class="link-title">Alura</div><div class="link-desc">Cursos e treinamentos</div></div>
+            </a>
+
+            <!-- Link 10: Chat de Cálculos (NOVO LINK ADICIONADO) -->
+            <a href="https://samueldasilvaegdio-jpg.github.io/EGIT-O-CHAT-DE-C-LCULOS/" target="_blank" class="link-card">
+                <div class="icon-box">
+                    <!-- Ícone de Calculadora -->
+                    <svg class="neon-svg" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="4" y="2" width="16" height="20" rx="2"></rect>
+                        <line x1="8" y1="6" x2="16" y2="6"></line>
+                        <line x1="16" y1="14" x2="16" y2="18"></line>
+                        <path d="M8 10h.01"></path>
+                        <path d="M12 10h.01"></path>
+                        <path d="M16 10h.01"></path>
+                        <path d="M8 14h.01"></path>
+                        <path d="M12 14h.01"></path>
+                        <path d="M8 18h.01"></path>
+                        <path d="M12 18h.01"></path>
+                    </svg>
+                </div>
+                <div class="link-body"><div class="link-title">Chat de Cálculos</div><div class="link-desc">Ferramenta de cálculos</div></div>
+            </a>
+
+<!-- Link 11: Chat de Cálculos (NOVO LINK ADICIONADO) -->
+<a href="https://apostiladestroyer.vercel.app/" target="_blank" class="link-card">
+    <div class="icon-box">
+        <!-- Apostilas -->
+        <svg class="neon-svg" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+            <circle cx="12" cy="5" r="2"></circle>
+            <path d="M12 7v4"></path>
+            <line x1="8" y1="16" x2="8" y2="16"></line>
+            <line x1="16" y1="16" x2="16" y2="16"></path>
+        </svg>
+    </div>
+    <div class="link-body">
+        <div class="link-title">Apostilas</div>
+        <div class="link-desc">ferramenta postila</div>
+    </div>
+</a>
+
+<!-- Link 12: KhaNEClipse -->
+<a href="https://crimsonzerohub.xyz/khan" target="_blank" class="link-card">
+    <div class="icon-box">
+        <!-- Ícone de Lua (Eclipse) -->
+        <svg class="neon-svg" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+    </div>
+    <div class="link-body">
+        <div class="link-title">KhaNEClipse</div>
+        <div class="link-desc">Ferramenta de Leitura</div>
+    </div>
+</a>
+
+<!-- Link 13: Eclipse Lunar -->
+<a href="https://discord.gg/MujEfZbg5" target="_blank" class="link-card">
+    <div class="icon-box">
+        <!-- Ícone de Lua / Eclipse -->
+        <svg class="neon-svg" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <path d="M12,2A9.91,9.91,0,0,0,9,2.46A10,10,0,0,1,9,21.54A10,10,0,1,0,12,2Z"></path>
+        </svg>
+    </div>
+    <div class="link-body">
+        <div class="link-title">Eclipse Lunar</div>
+        <div class="link-desc">comunidade dircord</div>
+    </div>
+</a>
+
+<!-- Link 14: LeiaSP -->
+<a href="https://leiasp.cupiditys.lol/?cmsphacks.xyz" target="_blank" class="link-card">
+    <div class="icon-box">
+        <!-- Ícone de Livro (Leitura) -->
+        <svg class="neon-svg" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+        </svg>
+    </div>
+    <div class="link-body">
+        <div class="link-title">LeiaSP</div>
+        <div class="link-desc">Ferramenta de Leitura</div>
+    </div>
+</a>
+
+<!-- Link 15: Tarefas Crimson -->
+<a href="https://crimsonzerohub.xyz/tarefas" target="_blank" class="link-card">
+    <div class="icon-box">
+        <!-- Ícone de Tarefas (Clipboard List) -->
+        <svg class="neon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+            <path d="M9 14h6"></path>
+            <path d="M9 18h6"></path>
+            <path d="M9 10h6"></path>
+          </svg>
+    </div>
+    <div class="link-body">
+        <div class="link-title">Tarefas Crimson</div>
+        <div class="link-desc">Crimson otimizar  </div>
+    </div>
+</a>
+
+<!-- Link 16: Matific -->
+<a href="https://matific.cupiditys.lol/dashboard?cmsphacks.xyz" target="_blank" class="link-card">
+    <div class="icon-box">
+        <!-- Ícone de Educação (Matific) -->
+        <svg class="neon-svg" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+            <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3z M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"></path>
+        </svg>
+    </div>
+    <div class="link-body">
+        <div class="link-title">Matific</div>
+        <div class="link-desc">Matemática</div>
+    </div>
+</a>
+
+        </svg>
+    </div>
+    <div class="link-body">
+        <div class="link-title">FUNDADOREAS</div>
+        <div class="link-desc">Cupiditys Flowings</div>
+    </div>
+</a>
+        </div>
+    </div>
+  </section>
+
+  <div class="footer">
+    <img src="https://cdn-icons-png.flaticon.com/512/1046/1046784.png" alt="Ícone">
+    <span id="clock">00:00:00</span>
+    <span style="opacity:0.5">|</span>
+    <span id="date">01/01/2024</span>
+    <span style="margin-left:12px; font-weight:800;">REI EGITO</span>
+  </div>
+</main>
+
+<script>
+/* LOADING INTRO */
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        document.getElementById('introOverlay').classList.add('slide-up');
+    }, 3500);
+});
+
+/* SEARCH FUNCTION */
+const searchInput = document.getElementById('searchInput');
+searchInput.addEventListener('keyup', (e) => {
+    const term = e.target.value.toLowerCase();
+    const cards = document.querySelectorAll('.link-card');
+    
+    cards.forEach(card => {
+        const title = card.querySelector('.link-title').innerText.toLowerCase();
+        const desc = card.querySelector('.link-desc').innerText.toLowerCase();
+        
+        if (title.includes(term) || desc.includes(term)) {
+            card.style.display = "flex";
+        } else {
+            card.style.display = "none";
+        }
+    });
+});
+
+/* TITLE TYPING EFFECT & GLITCH */
+const titleText = "utra egitao 🤓☠️☠️☠️🇧🇷🇧🇷";
+const titleEl = document.getElementById('mainTitle');
+let i = 0;
+function typeTitle() {
+    if (i < titleText.length) {
+        titleEl.textContent += titleText.charAt(i);
+        i++;
+        setTimeout(typeTitle, 100);
+    } else {
+        titleEl.classList.add('glitch-effect');
+        titleEl.setAttribute('data-text', titleText);
+    }
+}
+setTimeout(typeTitle, 4000); // Start after intro
+
+/* CLOCK & DATE */
+function updateClock() {
+    const now = new Date();
+    document.getElementById('clock').innerText = now.toLocaleTimeString('pt-BR');
+    document.getElementById('date').innerText = now.toLocaleDateString('pt-BR');
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+/* MOUSE MOVEMENT (Spotlight Effect) */
+document.addEventListener('mousemove', (e) => {
+    document.documentElement.style.setProperty('--mouse-x', e.clientX + 'px');
+    document.documentElement.style.setProperty('--mouse-y', e.clientY + 'px');
+});
+
+/* THEME SWITCHER */
+const themeBtn = document.getElementById('themeBtn');
+const toggleKnob = document.getElementById('knob');
+const toggleBg = document.getElementById('toggle');
+let isDark = true;
+
+themeBtn.addEventListener('click', toggleTheme);
+toggleBg.addEventListener('click', toggleTheme);
+
+function toggleTheme() {
+    isDark = !isDark;
+    if (isDark) {
+        document.documentElement.removeAttribute('data-theme');
+        toggleKnob.style.transform = 'translateX(0)';
+        toggleBg.style.background = 'rgba(255,255,255,0.1)';
+    } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        toggleKnob.style.transform = 'translateX(20px)';
+        toggleBg.style.background = '#ff007a';
+    }
+}
+
+/* ACCENT COLOR PICKER */
+const colorPicker = document.getElementById('accentPicker');
+colorPicker.addEventListener('input', (e) => {
+    document.documentElement.style.setProperty('--accent', e.target.value);
+});
+
+/* RGB RAIN LINES GENERATOR */
+const linesContainer = document.getElementById('rgbLines');
+const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+
+function createLine() {
+    const line = document.createElement('div');
+    line.classList.add('rgb-line');
+    
+    // Posição aleatória na horizontal
+    line.style.left = Math.random() * 100 + '%';
+    
+    // Cor aleatória
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+    line.style.setProperty('--line-color', randomColor);
+    
+    // Duração da queda aleatória
+    line.style.animationDuration = (Math.random() * 2 + 1) + 's';
+    
+    linesContainer.appendChild(line);
+
+    // Remove a linha após a animação para não pesar a memória
+    setTimeout(() => {
+        line.remove();
+    }, 3000);
+}
+
+// Cria uma nova linha a cada 100ms
+setInterval(createLine, 200);
+
+</script>
+</body>
+</html>
